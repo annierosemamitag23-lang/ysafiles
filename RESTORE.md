@@ -2,7 +2,7 @@
 
 This guide restores the repository plus the model file and MongoDB export that
 are stored separately. The MongoDB export contains personal data. Share it only
-with Annie; do not put it in Git.
+with Annie and group members authorized to access it; do not put it in Git.
 
 ## Prerequisites
 
@@ -92,8 +92,8 @@ set and otherwise connects to the local server.
 The export is stored separately on Drive or USB; see
 [Where the backup files are stored](#where-the-backup-files-are-stored) for its
 download link. The export contains personal data, including handles and post
-text, and must be shared only with Annie. Keep the export folder outside the
-repository.
+text, and must be shared only with Annie and group members authorized to access
+it. Keep the export folder outside the repository.
 
 The manifest lists every collection in `AgapAI_Database_Final`:
 
@@ -138,20 +138,30 @@ Expected counts after import are `events` 1, `posts` 60, and `users` 22.
 
 2. **MongoDB export:** [Download `agapai_mongo_export.zip` from Google
    Drive](https://drive.google.com/file/d/1x9wR-tzoy3Sz7GzHkLtP_YbCV2CyPolx/view?usp=drive_link).
-   Unzip it. The folder should contain `manifest.json` and `events.json`,
-   `posts.json`, and `users.json`. Run
-   `restore-kit\import_mongo.py --export <unzipped-folder>` and verify the
-   counts are 1, 60, and 22.
+   Unzip it. The extracted `agapai_mongo_export` folder contains
+   `manifest.json` and an `AgAPAI_Database_Final` subfolder with `events.json`,
+   `posts.json`, and `users.json`. Pass the extracted folder containing
+   `manifest.json` to `restore-kit\import_mongo.py --export <unzipped-folder>`;
+   do not pass the `AgAPAI_Database_Final` subfolder. Verify the counts are 1,
+   60, and 22.
 
-3. **Optional group Git history:** [Download
+3. **Optional group Git history bundle:** [Download
    `agapai_group_history.bundle` from Google
    Drive](https://drive.google.com/file/d/1-njfRhfXNf-LqO157cyp2cHx7W8XR-7t/view?usp=drive_link).
    Restore it with `git clone agapai_group_history.bundle <folder>`, replacing
    `<folder>` with the destination path. It contains the group's commits up to
    the backup time and does not include the old model versions.
 
-The MongoDB export and group history bundle contain other people's account
-handles and post text. Share them only with Annie and the group.
+4. **Full group history folder:** [Open the `.git_group_backup` folder in
+   Google Drive](https://drive.google.com/drive/folders/1JF4jjjtkAJjjFwedBnAEqejwBukKLzpm?usp=drive_link).
+   This is a separate backup of the group's old Git history and LFS objects,
+   including older model files not included in the bundle above. It is optional
+   for restoring the app from this repository, but may be needed to recover the
+   group's older history or model versions.
+
+The MongoDB export, group history bundle, and full group history folder may
+contain other people's account handles, post text, credentials, or model files.
+Share them only with Annie and group members authorized to access them.
 
 ## Environment variables
 
@@ -256,6 +266,6 @@ history. That history was retained by renaming the inner `.git` directory to
 files remain under `AgapAI\`. The outer `main` branch was then pushed to the
 `ysafiles` repository.
 
-The old group-history copy is optional for restoring the app. Its recorded
-local path is `C:\AgapAI\AgapAI\.git_group_backup`; preserve it separately if
-that history is needed.
+The old group-history copy is optional for restoring the app. Its local path at
+the time of this backup was `C:\AgapAI\AgapAI\.git_group_backup`; it is now
+stored in the [`.git_group_backup` Google Drive folder](https://drive.google.com/drive/folders/1JF4jjjtkAJjjFwedBnAEqejwBukKLzpm?usp=drive_link).
