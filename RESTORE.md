@@ -223,6 +223,10 @@ npm run build
 The dashboard package does not define an npm `test` script; its test file is
 run with Node's test runner as shown above.
 
+The `test_map_and_anchors_prefer_specific_place_over_province` test in
+`test_ner_pipeline.py` also fails in the original environment: it expects
+`Pardo` but receives `Cebu`.
+
 ## Troubleshooting
 
 - **`heads.pt` is a tiny text file:** it is an LFS pointer. Install Git LFS and
