@@ -54,14 +54,20 @@ target.
 | --- | --- | --- |
 | `AgapAI\agapai\api\requirements.txt` | API-facing dependency names with a mix of unpinned, minimum, and exact version constraints. | Reference only; it does not capture the complete installed environment. |
 | `.dependency-setup\requirements-compatible.txt` | A broader compatibility set, including data-science packages and older compatibility pins such as Transformers 4.36.2 and protobuf below 5. | Reference only; its package set and versions differ from the working venv. |
-| `restore-kit\requirements-frozen.txt` | The 302-line `pip freeze` captured from the working Python 3.11 venv, including transitive packages and exact versions. | **Use this as the source of truth.** |
+| `restore-kit\requirements-frozen.txt` | A 302-line `pip freeze` snapshot from a Python 3.11 venv configured with `include-system-site-packages = true`; it includes packages from the host Python installation. | Record only; do not install from this whole-machine snapshot. |
+| `restore-kit\requirements-restore.txt` | The project imports and test dependencies, pinned with their compatible transitive dependencies at the working versions; the set was resolved with pip's report mode. | **Use this for installation.** |
 
-The frozen capture contains two machine-local wheel URLs for `deepface` 0.0.95
-and `opencv-python` 4.12.0.88. `restore.ps1` makes a temporary requirements
-copy and substitutes those same version pins so pip can obtain the packages
-from its configured package index; the captured requirements file itself is
-left unchanged. The full environment includes large ML packages, so the script
-asks before installing it.
+The earlier dry-run failure came from unrelated host packages included by
+system-site-packages: MediaPipe requires `protobuf` below 5, while the Google
+AI dependencies in that host environment require `protobuf` 5.29.6 or newer.
+The project restore set excludes those unused packages, removing that conflict
+without changing the project requirements or the working environment.
+
+The restore set does not need the machine-local `deepface` or OpenCV wheel
+references in the whole-machine snapshot. It contains the project runtime and
+test imports, including transitive dependencies, with working-environment
+version pins. `restore.ps1` installs this file with `--no-cache-dir` and asks
+before starting the dependency download.
 
 To run the automated restore after cloning, use:
 
@@ -69,12 +75,12 @@ To run the automated restore after cloning, use:
 .\restore-kit\restore.ps1
 ```
 
-The script creates `AgapAI\agapai\.venv` if it is absent, installs the frozen
-requirements, installs dashboard dependencies with `npm ci` when
-`node_modules` is absent, prepares NLTK and Hugging Face resources, checks the
-model and LFS file, and offers to import the MongoDB export. It never removes
-files. It skips `npm ci` if `node_modules` already exists because npm may
-replace that directory.
+The script creates `AgapAI\agapai\.venv` if it is absent, installs
+`restore-kit\requirements-restore.txt`, runs `npm ci` if `node_modules` is
+absent, prepares NLTK and Hugging Face resources, checks the model and LFS
+file, and offers to import the MongoDB export. It never removes files. It
+skips `npm ci` if `node_modules` already exists because npm may replace that
+directory.
 
 ## MongoDB and the private data export
 
@@ -233,10 +239,9 @@ run with Node's test runner as shown above.
   importer will not overwrite it.
 - **MongoDB is unavailable:** install MongoDB 6.0 or newer, start its service,
   and check the local `MONGO_URI` setting.
-- **Python package install refers to a missing wheel:** `restore.ps1` replaces
-  only the two captured local wheel references with their frozen version pins
-  for package-index installation. If those versions are unavailable from the
-  configured index, supply the matching wheels separately.
+- **Python package resolution reports a conflict:** confirm that the restore
+  used `restore-kit\requirements-restore.txt`, not the whole-machine
+  `requirements-frozen.txt` snapshot.
 
 ## How this backup was made
 

@@ -11,7 +11,7 @@ $Api = Join-Path $Project "agapai\api"
 $Dashboard = Join-Path $Project "agapai\dashboard"
 $Venv = Join-Path $Project "agapai\.venv"
 $Python = Join-Path $Venv "Scripts\python.exe"
-$Frozen = Join-Path $Root "restore-kit\requirements-frozen.txt"
+$RestoreRequirements = Join-Path $Root "restore-kit\requirements-restore.txt"
 $ModelTarget = Join-Path $Api "agapai_api\models\agapai_multitask_xlmr\encoder\model.safetensors"
 $Heads = Join-Path $Api "agapai_api\models\agapai_multitask_xlmr\heads.pt"
 $ExpectedModelSize = [int64]1112197096
@@ -128,33 +128,15 @@ if (-not (Test-Path -LiteralPath $Python)) {
     Report-Step "Project virtual environment" $true "already exists; kept in place."
 }
 
-if ((Test-Path -LiteralPath $Python) -and (Test-Path -LiteralPath $Frozen)) {
-    $FrozenLines = Get-Content -LiteralPath $Frozen
-    $DeepfaceReplaced = $false
-    $OpenCvReplaced = $false
-    $PortableLines = foreach ($Line in $FrozenLines) {
-        if ($Line -match "^deepface @ file:///.*deepface-0\.0\.95-py3-none-any\.whl$") {
-            $DeepfaceReplaced = $true
-            "deepface==0.0.95"
-        } elseif ($Line -match "^opencv-python @ file:///.*opencv_python-4\.12\.0\.88-cp37-abi3-win_amd64\.whl$") {
-            $OpenCvReplaced = $true
-            "opencv-python==4.12.0.88"
-        } else {
-            $Line
-        }
-    }
-    if (-not ($DeepfaceReplaced -and $OpenCvReplaced)) {
-        Report-Step "Prepare frozen requirements" $false "Unexpected local wheel references; inspect restore-kit\requirements-frozen.txt."
-    } elseif (Confirm-LargeDownload "Python dependencies from the captured 302-package environment" "several GB (torch, TensorFlow, JAX and related packages)") {
-        $InstallRequirements = Join-Path $env:TEMP ("agapai-requirements-" + $PID + ".txt")
-        [System.IO.File]::WriteAllLines($InstallRequirements, [string[]]$PortableLines, [System.Text.UTF8Encoding]::new($false))
-        & $Python -m pip install -r $InstallRequirements
-        Report-Step "Install captured Python requirements" ($LASTEXITCODE -eq 0)
+if ((Test-Path -LiteralPath $Python) -and (Test-Path -LiteralPath $RestoreRequirements)) {
+    if (Confirm-LargeDownload "Project Python dependencies from requirements-restore.txt" "up to about 2 GB, including PyTorch") {
+        & $Python -m pip install --no-cache-dir -r $RestoreRequirements
+        Report-Step "Install project Python requirements" ($LASTEXITCODE -eq 0)
     } else {
-        Report-Step "Install captured Python requirements" $false "Approval declined; rerun when ready."
+        Report-Step "Install project Python requirements" $false "Approval declined; rerun when ready."
     }
 } else {
-    Report-Step "Install captured Python requirements" $false "Virtual environment or restore-kit\requirements-frozen.txt is missing."
+    Report-Step "Install project Python requirements" $false "Virtual environment or restore-kit\requirements-restore.txt is missing."
 }
 
 if ((Test-Path -LiteralPath $Python) -and (Test-Path -LiteralPath (Join-Path $Dashboard "package-lock.json"))) {
