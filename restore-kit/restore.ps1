@@ -97,7 +97,9 @@ if (Test-Path -LiteralPath $Heads) {
 
 if (-not (Test-Path -LiteralPath $ModelTarget)) {
     if ([string]::IsNullOrWhiteSpace($ModelPath)) {
-        $ModelPath = Read-Host "Enter the path to model.safetensors from Drive or USB"
+        Write-Host "Model backup: https://drive.google.com/file/d/1M1NkZm9070qSV3g0cfC87f3hOP3Rxmnc/view?usp=drive_link"
+        Write-Host "Download model_backup.safetensors, then save it as model.safetensors in the encoder folder."
+        $ModelPath = Read-Host "Enter the path to model.safetensors"
     }
     if (-not [string]::IsNullOrWhiteSpace($ModelPath) -and (Test-Path -LiteralPath $ModelPath -PathType Leaf)) {
         $SourceItem = Get-Item -LiteralPath $ModelPath
@@ -229,6 +231,9 @@ if ($null -eq $MongoService) {
 }
 
 if ([string]::IsNullOrWhiteSpace($MongoExportPath)) {
+    Write-Host "MongoDB export: https://drive.google.com/file/d/1x9wR-tzoy3Sz7GzHkLtP_YbCV2CyPolx/view?usp=drive_link"
+    Write-Host "Download agapai_mongo_export.zip and unzip it before entering the folder path."
+    Write-Host "Optional group history bundle: https://drive.google.com/file/d/1-njfRhfXNf-LqO157cyp2cHx7W8XR-7t/view?usp=drive_link"
     $MongoExportPath = Read-Host "Enter the Drive/USB folder containing manifest.json and AgapAI_Database_Final"
 }
 if ((Test-Path -LiteralPath (Join-Path $MongoExportPath "manifest.json")) -and (Test-Path -LiteralPath $Python)) {

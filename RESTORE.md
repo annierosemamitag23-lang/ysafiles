@@ -35,7 +35,8 @@ Download `model.safetensors` from Drive or USB. Model location:
 
 `AgapAI\agapai\api\agapai_api\models\agapai_multitask_xlmr\encoder\model.safetensors`
 
-Drive link: **[ADD GOOGLE DRIVE LINK]**
+See [Where the backup files are stored](#where-the-backup-files-are-stored) for
+the download link and saved filename.
 
 Verify the model file before using it:
 
@@ -82,8 +83,9 @@ MongoDB host is `localhost:27017`; it uses database `AgapAI_Database_Final`.
 The current Windows service is named `MongoDB`. The API uses `MONGO_URI` when
 set and otherwise connects to the local server.
 
-The export is stored separately on Drive or USB. **Location: [ADD DRIVE OR USB
-LOCATION].** The export contains personal data, including handles and post
+The export is stored separately on Drive or USB; see
+[Where the backup files are stored](#where-the-backup-files-are-stored) for its
+download link. The export contains personal data, including handles and post
 text, and must be shared only with Annie. Keep the export folder outside the
 repository.
 
@@ -119,6 +121,31 @@ every collection in the manifest, and compares the final counts:
 ```
 
 Expected counts after import are `events` 1, `posts` 60, and `users` 22.
+
+## Where the backup files are stored
+
+1. **Classifier model:** [Download `model_backup.safetensors` from Google
+   Drive](https://drive.google.com/file/d/1M1NkZm9070qSV3g0cfC87f3hOP3Rxmnc/view?usp=drive_link).
+   It is 1,112,197,096 bytes. Save it as `model.safetensors` in
+   `AgapAI\agapai\api\agapai_api\models\agapai_multitask_xlmr\encoder`.
+   Verify that its SHA256 matches `restore-kit\model-checksum.txt`.
+
+2. **MongoDB export:** [Download `agapai_mongo_export.zip` from Google
+   Drive](https://drive.google.com/file/d/1x9wR-tzoy3Sz7GzHkLtP_YbCV2CyPolx/view?usp=drive_link).
+   Unzip it. The folder should contain `manifest.json` and `events.json`,
+   `posts.json`, and `users.json`. Run
+   `restore-kit\import_mongo.py --export <unzipped-folder>` and verify the
+   counts are 1, 60, and 22.
+
+3. **Optional group Git history:** [Download
+   `agapai_group_history.bundle` from Google
+   Drive](https://drive.google.com/file/d/1-njfRhfXNf-LqO157cyp2cHx7W8XR-7t/view?usp=drive_link).
+   Restore it with `git clone agapai_group_history.bundle <folder>`, replacing
+   `<folder>` with the destination path. It contains the group's commits up to
+   the backup time and does not include the old model versions.
+
+The MongoDB export and group history bundle contain other people's account
+handles and post text. Share them only with Annie and the group.
 
 ## Environment variables
 
